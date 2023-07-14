@@ -1,5 +1,5 @@
 {
-  "files.trimTrailingWhitespace": true,
+  "files.trimTrailingWhitespace": false,
   "files.associations": {
     "*.*proj": "xml",
     "*.props": "xml",
@@ -13,5 +13,7 @@
     "editor.tabSize": 2
   },
   "dotnet.defaultSolution": "Razor.sln",
-  "omnisharp.defaultLaunchSolution": "Razor.sln"
+  "omnisharp.defaultLaunchSolution": "Razor.sln",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "editor.trimAutoWhitespace": false
 }

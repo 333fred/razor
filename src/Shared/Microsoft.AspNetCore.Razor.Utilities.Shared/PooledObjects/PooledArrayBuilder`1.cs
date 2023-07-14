@@ -29,6 +29,28 @@ internal ref struct PooledArrayBuilder<T>
         _pool = pool ?? ArrayBuilderPool<T>.Default;
         _capacity = capacity;
     }
+    
+    public T this[int i]
+    {
+        get
+        {
+            if (_builder is null || Count <= i)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
+            return _builder[i];
+        }
+        set
+        {
+            if (_builder is null || Count <= i)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
+            _builder[i] = value;
+        }
+    }
 
     public void Dispose()
     {
@@ -68,6 +90,16 @@ internal ref struct PooledArrayBuilder<T>
             _pool.Return(builder);
             _builder = null;
         }
+    }
+    
+    public void RemoveAt(int index)
+    {
+        if (_builder is null || Count <= index)
+        {
+            throw new IndexOutOfRangeException();
+        }
+
+        _builder.RemoveAt(index);
     }
 
     private readonly ImmutableArray<T>.Builder GetBuilder()

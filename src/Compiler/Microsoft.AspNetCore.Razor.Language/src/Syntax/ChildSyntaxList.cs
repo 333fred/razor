@@ -155,7 +155,7 @@ internal readonly struct ChildSyntaxList : IEquatable<ChildSyntaxList>, IReadOnl
     /// <remarks>
     /// Assumes that <paramref name="targetPosition"/> is within the span of <paramref name="node"/>.
     /// </remarks>
-    internal static SyntaxNode ChildThatContainsPosition(SyntaxNode node, int targetPosition)
+    internal static SyntaxNode ChildThatContainsPosition(SyntaxNode node, int targetPosition, out int containingSlot)
     {
         // The targetPosition must already be within this node
         Debug.Assert(node.FullSpan.Contains(targetPosition));
@@ -168,10 +168,9 @@ internal readonly struct ChildSyntaxList : IEquatable<ChildSyntaxList>, IReadOnl
 
         // Find the green node that spans the target position.
         // We will be skipping whole slots here so we will not loop for long
-        int slot;
-        for (slot = 0; ; slot++)
+        for (containingSlot = 0; ; containingSlot++)
         {
-            var greenChild = green.GetSlot(slot);
+            var greenChild = green.GetSlot(containingSlot);
             if (greenChild != null)
             {
                 var endPosition = position + greenChild.FullWidth;
@@ -188,7 +187,7 @@ internal readonly struct ChildSyntaxList : IEquatable<ChildSyntaxList>, IReadOnl
         }
 
         // Realize the red node (if any)
-        var red = node.GetNodeSlot(slot);
+        var red = node.GetNodeSlot(containingSlot);
         if (!green.IsList)
         {
             // This is a single node.
@@ -200,13 +199,13 @@ internal readonly struct ChildSyntaxList : IEquatable<ChildSyntaxList>, IReadOnl
         }
         else
         {
-            slot = green.FindSlotIndexContainingOffset(targetPosition - position);
+            containingSlot = green.FindSlotIndexContainingOffset(targetPosition - position);
 
             // Realize the red node (if any)
             if (red != null)
             {
                 // It is a red list of nodes
-                red = red.GetNodeSlot(slot);
+                red = red.GetNodeSlot(containingSlot);
                 if (red != null)
                 {
                     return red;
@@ -215,7 +214,7 @@ internal readonly struct ChildSyntaxList : IEquatable<ChildSyntaxList>, IReadOnl
 
             // Since we can't have "lists of lists", the Occupancy calculation for
             // child elements in a list is simple.
-            index += slot;
+            index += containingSlot;
         }
 
         return node;
