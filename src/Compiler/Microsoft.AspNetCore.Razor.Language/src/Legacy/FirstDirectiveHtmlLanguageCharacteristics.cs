@@ -15,5 +15,5 @@ internal class FirstDirectiveHtmlLanguageCharacteristics : HtmlLanguageCharacter
 
     public static new FirstDirectiveHtmlLanguageCharacteristics Instance => _instance;
 
-    public override HtmlTokenizer CreateTokenizer(ITextDocument source) => new DirectiveHtmlTokenizer(source);
+    public override HtmlTokenizer CreateTokenizer(SeekableTextReader source) => new DirectiveHtmlTokenizer(source);
 }

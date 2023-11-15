@@ -13,7 +13,7 @@ internal class DirectiveCSharpTokenizer : CSharpTokenizer
     private bool _visitedFirstTokenStart;
     private bool _visitedFirstTokenLineEnd;
 
-    public DirectiveCSharpTokenizer(ITextDocument source) : base(source)
+    public DirectiveCSharpTokenizer(SeekableTextReader source) : base(source)
     {
     }
 

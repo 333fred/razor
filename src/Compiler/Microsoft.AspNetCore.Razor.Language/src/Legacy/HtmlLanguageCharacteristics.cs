@@ -3,7 +3,6 @@
 
 #nullable disable
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Razor.Language.Syntax.InternalSyntax;
 
@@ -69,7 +68,7 @@ internal class HtmlLanguageCharacteristics : LanguageCharacteristics<HtmlTokeniz
         }
     }
 
-    public override HtmlTokenizer CreateTokenizer(ITextDocument source)
+    public override HtmlTokenizer CreateTokenizer(SeekableTextReader source)
     {
         return new HtmlTokenizer(source);
     }

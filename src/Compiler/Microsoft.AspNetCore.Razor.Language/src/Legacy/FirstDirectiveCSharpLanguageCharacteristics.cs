@@ -15,5 +15,5 @@ internal class FirstDirectiveCSharpLanguageCharacteristics : CSharpLanguageChara
 
     public static new FirstDirectiveCSharpLanguageCharacteristics Instance => _instance;
 
-    public override CSharpTokenizer CreateTokenizer(ITextDocument source) => new DirectiveCSharpTokenizer(source);
+    public override CSharpTokenizer CreateTokenizer(SeekableTextReader source) => new DirectiveCSharpTokenizer(source);
 }
