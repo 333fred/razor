@@ -18,7 +18,7 @@
                             Identifier;[gef];
                             QuestionMark;[?];
                             LeftBracket;[[];
-                            Minus;[-];
+                            CSharpOperator;[-];
                             IntegerLiteral;[1];
                             RightBracket;[]];
                             RightBracket;[]];

@@ -33,7 +33,7 @@
                                                 LeftParenthesis;[(];
                                             CSharpExpressionLiteral - [17..21)::4 - [11+1] - Gen<Expr>
                                                 IntegerLiteral;[11];
-                                                Plus;[+];
+                                                CSharpOperator;[+];
                                                 IntegerLiteral;[1];
                                             CSharpExpressionLiteral - [21..22)::1 - [)] - Gen<Expr>
                                                 RightParenthesis;[)];

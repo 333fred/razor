@@ -15,12 +15,12 @@
                             LeftBracket;[[];
                             IntegerLiteral;[4];
                             Whitespace;[ ];
-                            Star;[*];
+                            CSharpOperator;[*];
                             Whitespace;[ ];
                             LeftParenthesis;[(];
                             IntegerLiteral;[8];
                             Whitespace;[ ];
-                            Plus;[+];
+                            CSharpOperator;[+];
                             Whitespace;[ ];
                             IntegerLiteral;[7];
                             RightParenthesis;[)];
