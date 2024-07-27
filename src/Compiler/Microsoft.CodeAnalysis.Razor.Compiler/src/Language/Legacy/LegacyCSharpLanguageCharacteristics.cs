@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Razor.Language.Syntax.InternalSyntax;
@@ -85,8 +83,7 @@ internal class LegacyCSharpLanguageCharacteristics : LanguageCharacteristics<CSh
 
     public override string GetSample(SyntaxKind kind)
     {
-        string sample;
-        if (!_tokenSamples.TryGetValue(kind, out sample))
+        if (!_tokenSamples.TryGetValue(kind, out var sample))
         {
             switch (kind)
             {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.AspNetCore.Razor.Language.Syntax.InternalSyntax;
 using Microsoft.AspNetCore.Razor.PooledObjects;
@@ -73,7 +74,7 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
 
     protected SpanContextConfigAction? SpanContextConfig { get; set; }
 
-    protected SyntaxToken CurrentToken
+    protected SyntaxToken? CurrentToken
     {
         get { return _tokenizer.Current; }
     }
@@ -90,7 +91,7 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
     protected LanguageCharacteristics<TTokenizer> Language { get; }
     protected Func<string, IEnumerable<SyntaxToken>> LanguageTokenizeString { get; }
 
-    protected SyntaxToken Lookahead(int count)
+    protected SyntaxToken? Lookahead(int count)
     {
         if (count < 0)
         {
@@ -101,7 +102,7 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
             return CurrentToken;
         }
 
-        using var _ = ListPool<SyntaxToken>.GetPooledObject(out var tokens);
+        using var _ = ListPool<SyntaxToken?>.GetPooledObject(out var tokens);
 
         // We add 1 in order to store the current token.
         tokens.SetCapacityIfLarger(count + 1);
@@ -142,6 +143,11 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
             throw new ArgumentNullException(nameof(condition));
         }
 
+        if (!EnsureCurrent())
+        {
+            return false;
+        }
+
         var matchFound = false;
 
         using var _ = ListPool<SyntaxToken>.GetPooledObject(out var tokens);
@@ -175,6 +181,7 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
         return matchFound;
     }
 
+    [MemberNotNullWhen(true, nameof(CurrentToken))]
     protected internal bool NextToken()
     {
         PreviousToken = CurrentToken;
@@ -185,7 +192,7 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
     [Conditional("DEBUG")]
     internal void Assert(SyntaxKind expectedType)
     {
-        Debug.Assert(!EndOfFile && CurrentToken.Kind == expectedType);
+        Debug.Assert(!EndOfFile && CurrentToken!.Kind == expectedType);
     }
 
     protected internal void PutBack(SyntaxToken? token)
@@ -289,6 +296,7 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
         return tokenFound;
     }
 
+    [MemberNotNullWhen(true, nameof(CurrentToken))]
     protected bool EnsureCurrent()
     {
         if (CurrentToken == null)
@@ -557,6 +565,7 @@ internal abstract class TokenizerBackedParser<TTokenizer> : ParserBase
         return true;
     }
 
+    [MemberNotNullWhen(true, nameof(CurrentToken))]
     protected internal bool AcceptAndMoveNext()
     {
         Accept(CurrentToken);

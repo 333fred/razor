@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
-
 using Microsoft.AspNetCore.Razor.Language.Syntax.InternalSyntax;
 
 namespace Microsoft.AspNetCore.Razor.Language.Legacy;
@@ -17,7 +15,7 @@ internal class TokenizerView<TTokenizer>
 
     public TTokenizer Tokenizer { get; private set; }
     public bool EndOfFile { get; private set; }
-    public SyntaxToken Current { get; private set; }
+    public SyntaxToken? Current { get; private set; }
 
     public SeekableTextReader Source
     {

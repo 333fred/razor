@@ -245,11 +245,12 @@ internal class CSharpCodeParser : TokenizerBackedParser<CSharpTokenizer>
                     CurrentToken.Content.Length > 0 &&
                     CurrentToken.Content[0] == SyntaxConstants.TransitionCharacter)
                 {
-                    var split = Language.SplitToken(CurrentToken, 1, SyntaxKind.Transition);
-                    transitionToken = split.Item1;
+                    var (left, right) = Language.SplitToken(CurrentToken, 1, SyntaxKind.Transition);
+                    transitionToken = left;
 
                     // Back up to the end of the transition
-                    Context.Source.Position -= split.Item2.Content.Length;
+                    Debug.Assert(right != null);
+                    Context.Source.Position -= right.Content.Length;
                     NextToken();
                 }
                 else if (At(SyntaxKind.Transition))
@@ -1770,7 +1771,6 @@ internal class CSharpCodeParser : TokenizerBackedParser<CSharpTokenizer>
 
                             InitializeContext();
                             IsNested = wasNested;
-                            NextToken();
                         });
                         break;
                     case DirectiveKind.CodeBlock:

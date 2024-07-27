@@ -1,10 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
-
-using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Razor.Language.Syntax.InternalSyntax;
 
 namespace Microsoft.AspNetCore.Razor.Language.Legacy;
@@ -27,7 +25,7 @@ internal abstract class LanguageCharacteristics<TTokenizer>
         using (var reader = new SeekableTextReader(input, start.FilePath))
         {
             var tok = CreateTokenizer(reader);
-            SyntaxToken token;
+            SyntaxToken? token;
             while ((token = tok.NextToken()) != null)
             {
                 yield return token;
@@ -35,64 +33,64 @@ internal abstract class LanguageCharacteristics<TTokenizer>
         }
     }
 
-    public virtual bool IsWhitespace(SyntaxToken token)
+    public virtual bool IsWhitespace([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.Whitespace);
     }
 
-    public virtual bool IsNewLine(SyntaxToken token)
+    public virtual bool IsNewLine([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.NewLine);
     }
 
-    public virtual bool IsIdentifier(SyntaxToken token)
+    public virtual bool IsIdentifier([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.Identifier);
     }
 
-    public virtual bool IsKeyword(SyntaxToken token)
+    public virtual bool IsKeyword([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.Keyword);
     }
 
-    public virtual bool IsTransition(SyntaxToken token)
+    public virtual bool IsTransition([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.Transition);
     }
 
-    public virtual bool IsCommentStart(SyntaxToken token)
+    public virtual bool IsCommentStart([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.CommentStart);
     }
 
-    public virtual bool IsCommentStar(SyntaxToken token)
+    public virtual bool IsCommentStar([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.CommentStar);
     }
 
-    public virtual bool IsCommentBody(SyntaxToken token)
+    public virtual bool IsCommentBody([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.CommentBody);
     }
 
-    public virtual bool IsUnknown(SyntaxToken token)
+    public virtual bool IsUnknown([NotNullWhen(true)] SyntaxToken? token)
     {
         return IsKnownTokenType(token, KnownTokenType.Unknown);
     }
 
-    public virtual bool IsKnownTokenType(SyntaxToken token, KnownTokenType type)
+    public virtual bool IsKnownTokenType([NotNullWhen(true)] SyntaxToken? token, KnownTokenType type)
     {
         return token != null && (token.Kind == GetKnownTokenType(type));
     }
 
-    public virtual (SyntaxToken left, SyntaxToken right) SplitToken(SyntaxToken token, int splitAt, SyntaxKind leftType)
+    public virtual (SyntaxToken left, SyntaxToken? right) SplitToken(SyntaxToken token, int splitAt, SyntaxKind leftType)
     {
-        var left = CreateToken(token.Content.Substring(0, splitAt), leftType, Array.Empty<RazorDiagnostic>());
+        var left = CreateToken(token.Content[..splitAt], leftType, []);
 
-        SyntaxToken right = null;
+        SyntaxToken? right = null;
         if (splitAt < token.Content.Length)
         {
-            right = CreateToken(token.Content.Substring(splitAt), token.Kind, token.GetDiagnostics());
+            right = CreateToken(token.Content[splitAt..], token.Kind, token.GetDiagnostics());
         }
 
         return (left, right);

@@ -217,7 +217,7 @@ internal class HtmlMarkupParser : TokenizerBackedParser<HtmlTokenizer>
     private void ParseMarkupNodes(
         in SyntaxListBuilder<RazorSyntaxNode> builder,
         ParseMode mode,
-        Func<SyntaxToken, bool>? stopCondition = null)
+        Func<SyntaxToken?, bool>? stopCondition = null)
     {
         stopCondition = stopCondition ?? (token => false);
         while (!EndOfFile && !stopCondition(CurrentToken))
@@ -358,7 +358,7 @@ internal class HtmlMarkupParser : TokenizerBackedParser<HtmlTokenizer>
 
                 // Make sure the current token is not markup, which can be html start tag or @:
                 if (!(At(SyntaxKind.OpenAngle) ||
-                    (At(SyntaxKind.Transition) && Lookahead(count: 1).Content.StartsWith(":", StringComparison.Ordinal))))
+                    (At(SyntaxKind.Transition) && Lookahead(count: 1) is { } lookahead && lookahead.Content.StartsWith(":", StringComparison.Ordinal))))
                 {
                     // Don't accept whitespace as markup if the end text tag is followed by csharp.
                     shouldAcceptWhitespaceAndNewLine = false;
@@ -402,23 +402,23 @@ internal class HtmlMarkupParser : TokenizerBackedParser<HtmlTokenizer>
         builder.Add(transition);
 
         // "@:" => Explicit Single Line Block
-        if (CurrentToken.Kind == SyntaxKind.Text && CurrentToken.Content.Length > 0 && CurrentToken.Content[0] == ':')
+        if (CurrentToken?.Kind == SyntaxKind.Text && CurrentToken.Content.Length > 0 && CurrentToken.Content[0] == ':')
         {
             // Split the token
-            var split = Language.SplitToken(CurrentToken, 1, SyntaxKind.Colon);
+            var (left, right) = Language.SplitToken(CurrentToken, 1, SyntaxKind.Colon);
 
             // The first part (left) is output as MetaCode
-            Accept(split.Item1);
+            Accept(left);
             chunkGenerator = SpanChunkGenerator.Null;
             builder.Add(OutputAsMetaCode(Output(), AcceptedCharactersInternal.Any));
-            if (split.Item2 != null)
+            if (right != null)
             {
-                Accept(split.Item2);
+                Accept(right);
             }
             NextToken();
             ParseSingleLineMarkup(builder);
         }
-        else if (CurrentToken.Kind == SyntaxKind.OpenAngle)
+        else if (CurrentToken?.Kind == SyntaxKind.OpenAngle)
         {
             // Template
             // E.g, @<div>Foo</div>
@@ -442,11 +442,12 @@ internal class HtmlMarkupParser : TokenizerBackedParser<HtmlTokenizer>
         // Now parse until a new line.
         do
         {
-            ParseMarkupNodes(builder, ParseMode.Text, token => token.Kind == SyntaxKind.Whitespace || token.Kind == SyntaxKind.NewLine);
+            ParseMarkupNodes(builder, ParseMode.Text, token => token != null && (token.Kind == SyntaxKind.Whitespace || token.Kind == SyntaxKind.NewLine));
             if (At(SyntaxKind.Whitespace))
             {
                 AcceptAndMoveNext();
             }
+            EnsureCurrent();
         } while (!EndOfFile && CurrentToken.Kind != SyntaxKind.NewLine);
 
         // Code block inside single-line markup transition (`@: @{ }`)
@@ -2078,24 +2079,29 @@ internal class HtmlMarkupParser : TokenizerBackedParser<HtmlTokenizer>
         var nesting = 1;
         while (nesting > 0 && !EndOfFile)
         {
-            ParseMarkupNodes(builder, ParseMode.Text, token =>
+            ParseMarkupNodes(builder, ParseMode.Text, stopCondition: token =>
                 token.Kind == SyntaxKind.Text ||
                 token.Kind == SyntaxKind.OpenAngle);
             if (At(SyntaxKind.Text))
             {
                 // We need to inspect this text token to figure out if this could be the end of the Razor block
                 // or if it is the start of a new block in which case we need to keep track of the nesting level.
-                nesting += ProcessTextToken(builder, nestingSequences, nesting);
-                if (CurrentToken != null)
+                var nestingAdjustment = ProcessTextToken(builder, nestingSequences, nesting);
+                nesting += nestingAdjustment;
+                if (nestingAdjustment == 0)
                 {
                     // This was just some regular text. Accept and move on.
                     // If we were at the end of a block, we would have already accepted it and CurrentToken will be null.
                     AcceptAndMoveNext();
                 }
-                else if (nesting > 0)
+                else if (nestingAdjustment > 0)
                 {
                     // This was the start of a new block. We've already consumed the text. Move on.
                     NextToken();
+                }
+                else
+                {
+                    EnsureCurrent();
                 }
             }
             else

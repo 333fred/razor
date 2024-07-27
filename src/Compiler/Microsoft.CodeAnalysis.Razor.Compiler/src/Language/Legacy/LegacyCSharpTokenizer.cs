@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Frozen;
@@ -458,8 +456,7 @@ internal class LegacyCSharpTokenizer : CSharpTokenizer
     {
         var first = CurrentCharacter;
         TakeCurrent();
-        Func<SyntaxKind> handler;
-        if (_operatorHandlers.TryGetValue(first, out handler))
+        if (_operatorHandlers.TryGetValue(first, out var handler))
         {
             return handler();
         }
@@ -717,7 +714,7 @@ internal class LegacyCSharpTokenizer : CSharpTokenizer
         Debug.Assert(SyntaxFacts.IsIdentifierStartCharacter(CurrentCharacter));
         TakeCurrent();
         TakeUntil(c => !SyntaxFacts.IsIdentifierPartCharacter(c));
-        SyntaxToken token = null;
+        SyntaxToken? token = null;
         if (HaveContent)
         {
             var type = SyntaxKind.Identifier;
@@ -741,7 +738,7 @@ internal class LegacyCSharpTokenizer : CSharpTokenizer
         return Transition((int)state, result: null);
     }
 
-    private StateResult Transition(CSharpTokenizerState state, SyntaxToken result)
+    private StateResult Transition(CSharpTokenizerState state, SyntaxToken? result)
     {
         return Transition((int)state, result);
     }
